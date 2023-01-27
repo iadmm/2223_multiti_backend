@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { getCurrentPlaylist, getLatestSlide } from "../lib/queries.js";
+import { Playlist } from "../lib/models.js";
+import slidesRouter from "./playlistSlides.js";
 
 const playlistsRouter = Router();
 
@@ -9,25 +10,45 @@ playlistsRouter.post("/", async (req, res) => {
     res.status(401);
     return res.json({ msg: "please provide a name" });
   }
-  const latestSlide = await getLatestSlide(req.context.db);
-
-  const slide = await req.context.db.collection("playlists").insertOne({
+  const playlist = await Playlist.create({
     name,
-    created_at: new Date(),
-    current_slide: latestSlide._id,
   });
-  req.context.io.emit()
-  return res.json(slide);
+  return res.json(playlist);
 });
 
 playlistsRouter.get("/", async (req, res) => {
-  const slides = await req.context.db.collection("playlists").find().toArray();
+  const slides = await Playlist.find();
   return res.json(slides);
 });
 
 playlistsRouter.get("/current", async (req, res) => {
-  const playlist = await getCurrentPlaylist(req.context.db);
+  const playlist = await Playlist.findOne()
+    .populate("slides")
+    .sort({ created_at: -1 });
   return res.json(playlist);
 });
+
+playlistsRouter.get("/:playlistId", async (req, res) => {
+  const playlist = await Playlist.findById(req.params.playlistId).populate(
+    "slides"
+  );
+  return res.json(playlist);
+});
+playlistsRouter.use(
+  "/:playlistId/slides",
+  async (req, res, next) => {
+    if (req.params.playlistId === "current") {
+      req.playlist = await Playlist.findOne()
+        .populate("slides")
+        .sort({ created_at: -1 });
+    } else {
+      req.playlist = await Playlist.findById(req.params.playlistId).populate(
+        "slides"
+      );
+    }
+    next();
+  },
+  slidesRouter
+);
 
 export default playlistsRouter;

@@ -1,9 +1,12 @@
-import slidesRouter from "./routes/slides.js";
-import { Db, MongoClient, ObjectId } from "mongodb";
+import { MongoClient } from "mongodb";
 import express from "express";
+import slidesRouter from "./routes/slides.js";
 import playlistsRouter from "./routes/playlists.js";
 import http from 'http';
 import { Server } from "socket.io";
+import mongoose from "mongoose";
+mongoose.connect('mongodb+srv://multiti:l2INKNKI050WFqkR@cluster0.mvxofd8.mongodb.net/?retryWrites=true&w=majority');
+mongoose.set('strictQuery', false);
 
 const uri =
     "mongodb+srv://multiti:l2INKNKI050WFqkR@cluster0.mvxofd8.mongodb.net/?retryWrites=true&w=majority";
@@ -34,8 +37,8 @@ const initExpress = (context) => {
   app.get("/", (req, res) => {
     return res.json({ msg: "ok" });
   });
-  app.use('/slides', slidesRouter)
   app.use('/playlists', playlistsRouter)
+  app.use('/slides', slidesRouter)
 
   app.listen(port, () => {
     console.log(`listening on port http://localhost:${port}`);
