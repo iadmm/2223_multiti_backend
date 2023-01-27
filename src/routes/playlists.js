@@ -24,16 +24,23 @@ playlistsRouter.get("/", async (req, res) => {
 playlistsRouter.get("/current", async (req, res) => {
   const playlist = await Playlist.findOne()
     .populate("slides")
+    .populate("currentlyPlaying")
     .sort({ created_at: -1 });
   return res.json(playlist);
 });
 
 playlistsRouter.get("/:playlistId", async (req, res) => {
-  const playlist = await Playlist.findById(req.params.playlistId).populate(
-    "slides"
-  );
+  const playlist = await Playlist.findById(req.params.playlistId)
+    .populate("slides")
+    .populate("currentlyPlaying");
   return res.json(playlist);
 });
+
+playlistsRouter.delete("/:playlistId", async (req, res) => {
+  const playlist = await Playlist.findByIdAndDelete(req.params.playlistId);
+  return res.json(playlist);
+});
+
 playlistsRouter.use(
   "/:playlistId/slides",
   async (req, res, next) => {
