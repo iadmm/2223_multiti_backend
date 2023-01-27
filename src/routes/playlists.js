@@ -44,16 +44,23 @@ playlistsRouter.delete("/:playlistId", async (req, res) => {
 playlistsRouter.use(
   "/:playlistId/slides",
   async (req, res, next) => {
-    if (req.params.playlistId === "current") {
-      req.playlist = await Playlist.findOne()
-        .populate("slides")
-        .sort({ created_at: -1 });
-    } else {
-      req.playlist = await Playlist.findById(req.params.playlistId).populate(
-        "slides"
-      );
+    try{
+      if (req.params.playlistId === "current") {
+
+        req.playlist = await Playlist.findOne()
+          .populate("slides")
+          .sort({ created_at: -1 });
+      } else {
+        req.playlist = await Playlist.findById(req.params.playlistId).populate(
+          "slides"
+        );
+      }
+      next();
+    } catch (e){
+      res.status = 404;
+      res.json({msg:"not found"})
     }
-    next();
+
   },
   slidesRouter
 );

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { Slide } from "../lib/models.js";
 import { unfurl } from "unfurl.js";
+import {removeSlideFromPlaylist} from "../lib/queries.js";
 
 const slidesRouter = Router();
 
